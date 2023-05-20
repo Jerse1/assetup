@@ -1,0 +1,24 @@
+{
+  "name": "image-uploader-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "imgup": "./index.js"
+  },
+  "keywords": [],
+  "author": "jerse",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "chalk": "4.0.0",
+    "cli-table3": "^0.6.3",
+    "conf": "^10.2.0",
+    "esm": "^3.2.25",
+    "minimist": "^1.2.6",
+    "uuid": "^9.0.0"
+  }
+}
