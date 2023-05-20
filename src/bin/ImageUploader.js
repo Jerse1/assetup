@@ -77,12 +77,11 @@ async function createAsset(filePath, fileName, displayName, creator, apiKey) {
         return response.data.path;
     } catch (err) {
         const { data, status, statusText } = err.response;
-        console.error("Error message:", data.title);
+        console.error("Error data:", data);
         console.error("HTTP status code:", status);
         console.error("HTTP status text:", statusText);
-        console.error("Validation errors:", data.errors);
-        console.error("Trace ID:", data.traceId);
-        throw err;
+
+        throw "Error creating asset";
     }
 }
 
@@ -123,6 +122,9 @@ async function getAssetId(operationId, apiKey) {
 function getConfig() {
     const config = new Conf().get(configKey);
 
+    if (!config) {
+        throw new Error('Config object is undefined');
+    }
     if (!config.apiKey) {
         throw new Error('apiKey is missing in the configuration');
     }
@@ -150,8 +152,20 @@ function getCreator(config) {
 
 export async function uploadImages(directoryPath, output, method) {
     const outputStream = fs.createWriteStream(output);
-    const files = fs.readdirSync(directoryPath);
     const config = getConfig();
+
+    const files = fs.readdirSync(directoryPath)
+    .filter(file => path.extname(file) === ".png") // Only process .png files
+    .sort((a, b) => {
+        const numA = Number(a.split('.png')[0]); // Assuming files are named like '123.png'
+        const numB = Number(b.split('.png')[0]);
+        
+        if (isNaN(numA) || isNaN(numB)) {
+            return a.localeCompare(b); // if names are not numbers, sort them as strings
+        }
+
+        return numA - numB; // This will sort numerically
+    });
 
     if (!files || files.length === 0) {
         console.log("No files found in the directory.");
@@ -179,6 +193,8 @@ export async function uploadImages(directoryPath, output, method) {
             let startTime = Date.now();
 
             try {
+                console.log(`Uploading [${counter}] ${file}...`);
+
                 const operationId = await createAsset(filePath, file, uuidv4(), creator, apiKey);
                 const assetId = await getAssetId(operationId, apiKey);
 
@@ -208,6 +224,8 @@ export async function uploadImages(directoryPath, output, method) {
 
                 console.log(`Time taken to upload [${counter}] ${file}: ${uploadTime} seconds`);
             } catch (error) {
+                outputStream.write(`[${counter}] = nil`);
+
                 console.error(`Failed to upload file ${file}:`, error);
             }
 

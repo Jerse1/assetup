@@ -6,9 +6,23 @@ export async function configure(args) {
   let currentConfigObject = config.get(configKey);
   currentConfigObject = currentConfigObject || {};
 
+  if (Object.keys(args).length === 1) {
+    console.log('Current configuration:');  
+    console.log('Creator: ' + currentConfigObject.creator); 
+    console.log('API Key: ' + currentConfigObject.apiKey);  
+    console.log('Group ID: ' + currentConfigObject.groupId);
+    console.log('User ID: ' + currentConfigObject.userId);
+
+    return;
+  }
+
   let creator = args.creator || args.Creator || args.c;
   if (!creator) {
     creator = currentConfigObject.creator;
+  }
+
+  if (!['user', 'group'].includes(creator)) {
+    throw new Error('Invalid creator in the configuration');
   }
 
   let apiKey = args.apiKey || args.apikey || args['api-key'] || args.key || args.k;
@@ -26,5 +40,9 @@ export async function configure(args) {
     userId = currentConfigObject.userId;
   }
 
+  console.log('Saving configuration...');
+
   config.set(configKey, { creator: creator, apiKey: apiKey, groupId: groupId, userId: userId });
+
+  console.log('Configuration saved.');
 }
