@@ -16,14 +16,14 @@ export async function upload(args) {
     args.method = 'image';
   }
 
-  if (!args.hasOwnProperty('path')) {
-    args.path = 'images';
+  if (!args.hasOwnProperty('input')) {
+    args.input = 'input';
   }
 
-  if (args.path) {
-    fs.access(args.path, fs.F_OK, (err) => {
+  if (args.input) {
+    fs.access(args.input, fs.F_OK, (err) => {
         if (err) {
-            console.error(`Path '${args.path}' must be valid!`)
+            console.error(`Input '${args.input}' must be valid!`)
             return
         }
       })
@@ -37,5 +37,5 @@ export async function upload(args) {
     }
   }
 
-  uploadImages(args.path, args.output, args.method);
+  uploadImages(args.input, args.output, args.method);
 }

@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import Conf from "conf";
 import { promisify } from "util";
 import { configKey } from "../cmd/configure";
+import colors from "colors/safe";
 
 const ASSETS_INNER_ENDPOINT = "https://apis.roblox.com/assets/v1";
 const ASSETS_OUTER_ENDPOINT = `${ASSETS_INNER_ENDPOINT}/assets`;
@@ -14,6 +15,13 @@ const ASSET_DELIVERY_ENDPOINT = "https://assetdelivery.roblox.com/v1/asset";
 const ASSET_TYPE = "Decal";
 const OUTPUT_HEADER = "{\n";
 const OUTPUT_FOOTER = "\n}";
+
+colors.setTheme({
+    upload: 'green',
+    counter: 'cyan',
+    number: 'yellow',
+    file: 'magenta',
+  })
 
 const sleep = promisify(setTimeout);
 
@@ -43,7 +51,7 @@ async function getImageId(assetId) {
             throw new Error(JSON.stringify(error));
         }
 
-        console.log(200, { imageId: match[1] });
+        //console.log(200, { imageId: match[1] });
         return match[1];
     } catch (e) {
         console.log(500, { error: true, message: e.message });
@@ -179,6 +187,7 @@ export async function uploadImages(directoryPath, output, method) {
     const totalStartTime = Date.now();
     let previousTime = process.hrtime.bigint();
     let counter = 1;
+    let successCount = 0;
 
     outputStream.write(OUTPUT_HEADER);
 
@@ -193,7 +202,7 @@ export async function uploadImages(directoryPath, output, method) {
             let startTime = Date.now();
 
             try {
-                console.log(`Uploading [${counter}] ${file}...`);
+                console.log(`[${colors.counter(counter)}] Uploading ${colors.file(file)}...`);
 
                 const operationId = await createAsset(filePath, file, uuidv4(), creator, apiKey);
                 const assetId = await getAssetId(operationId, apiKey);
@@ -222,7 +231,13 @@ export async function uploadImages(directoryPath, output, method) {
                 const endTime = Date.now();
                 const uploadTime = (endTime - startTime) / 1000;
 
-                console.log(`Time taken to upload [${counter}] ${file}: ${uploadTime} seconds`);
+                successCount++;
+
+                console.log(`[${colors.counter(counter)}]`, colors.upload(`Asset was uploaded successfully`) + `
+    File: ${colors.file(file)}
+    Id: ${colors.number(assetId)},
+    ImageId: ${colors.number(imageId)},
+    Time taken: ${colors.number(uploadTime)} seconds`)
             } catch (error) {
                 outputStream.write(`[${counter}] = nil`);
 
@@ -238,7 +253,10 @@ export async function uploadImages(directoryPath, output, method) {
 
     const totalEndTime = Date.now();
     const totalTime = (totalEndTime - totalStartTime) / 1000;
-    console.log(`Total time taken: ${totalTime} seconds`);
+    console.log(colors.upload(`Total time taken:`), 
+    colors.number(totalTime), 
+    colors.upload(`seconds, (${colors.counter(successCount)}/${colors.counter(fileCount)}) files uploaded successfully`)
+    );
 
     outputStream.end();
 }
