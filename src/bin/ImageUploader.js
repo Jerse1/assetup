@@ -261,7 +261,7 @@ export async function uploadImages(directoryPath, output, method) {
             try {
                 console.log(`[${colors.counter(counter)}] ${colors.upload(`Uploading ${colors.file(file)}...`)}`);
 
-                const DisplayName = generateDisplayName(file);
+                const DisplayName = generateDisplayName();
 
                 const operationId = await createAsset(filePath, DisplayName, creator, apiKey, config.uploadAssetRetryCount);
                 const assetId = await getAssetId(operationId, apiKey, config.getAssetIdRetryCount);
