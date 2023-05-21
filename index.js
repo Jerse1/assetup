@@ -4,4 +4,6 @@
 require = require('esm')(module);
 
 // import the cli function from cli.js
+require('./src/cli').init();
+
 require('./src/cli').cli(process.argv);

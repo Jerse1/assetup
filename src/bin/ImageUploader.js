@@ -110,7 +110,9 @@ async function getAssetId(operationId, apiKey, retryCount) {
     for (let attemptsMade = 0; attemptsMade < retryCount; attemptsMade++) {
         try {
             const response = await Axios.get(`${ASSETS_INNER_ENDPOINT}/${operationId}`, {
-                headers: { 'x-api-key': apiKey },
+                headers: {
+                    'x-api-key': apiKey,
+                },
             });
 
             assetId = response.data.response.assetId;
@@ -146,7 +148,6 @@ function getConfig() {
     if (!['user', 'group'].includes(config.creator)) {
         throw new Error('Invalid creator in the configuration');
     }
-    console.log(config);
 
     config.getAssetIdRetryCount = config.getAssetIdRetryCount || 3; 
     config.uploadAssetRetryCount = config.uploadAssetRetryCount || 3;
@@ -218,7 +219,7 @@ export async function uploadImages(directoryPath, output, method) {
                 console.log(`[${colors.counter(counter)}] Uploading ${colors.file(file)}...`);
 
                 const operationId = await createAsset(filePath, file, uuidv4(), creator, apiKey, config.uploadAssetRetryCount);
-                const assetId = await getAssetId(operationId, apiKey, config.getAssetRetryCount);
+                const assetId = await getAssetId(operationId, apiKey, config.getAssetIdRetryCount);
 
                 let imageId;
                 if (method === "both" || method === "image") {

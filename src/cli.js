@@ -3,6 +3,11 @@ import { help } from './cmd/help';
 import { version } from './cmd/version';
 import { configure } from './cmd/configure';
 import { upload } from './cmd/upload';
+//import { initializeConfig } from './cmd/configure';
+
+export async function init(){
+  //initializeConfig();
+}
 
 export async function cli(argsArray) {
   const args = minimist(argsArray.slice(2));
