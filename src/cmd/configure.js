@@ -16,8 +16,10 @@ export async function configure(args) {
   let currentConfigObject = config.get(configKey);
   currentConfigObject = currentConfigObject || {};
 
+  const arg_len = Object.keys(args).length;
+
   let creator = args.creator || args.Creator || args.c || currentConfigObject.creator;
-  if (!['user', 'group'].includes(creator)) {
+  if (!['user', 'group'].includes(creator) && arg_len > 1) {
     throw new Error(colors.error('Invalid creator in the configuration'));
   }
 
@@ -47,7 +49,7 @@ export async function configure(args) {
     console.log(colors.saving('No changes made to the configuration.'));
   }
 
-  if (Object.keys(args).length === 1) {
+  if (arg_len === 1) {
     console.log(colors.title('Current configuration:'));
     console.log(colors.key('Creator:') + ' ' + colors.value(updatedConfig.creator));
     console.log(colors.key('API Key:') + ' ' + colors.value(updatedConfig.apiKey));
