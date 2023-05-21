@@ -7,6 +7,12 @@ export async function upload(args) {
   if (args.o){
     args.output = args.o;
   }
+  if (args.i){
+    args.input = args.i;
+  }
+  if (args.m){
+    args.method = args.m;
+  }
 
   if (!args.hasOwnProperty('output')) {
     args.output = 'output.txt';
