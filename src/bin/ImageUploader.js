@@ -21,45 +21,47 @@ colors.setTheme({
     counter: 'cyan',
     number: 'yellow',
     file: 'magenta',
-  })
+})
 
 const sleep = promisify(setTimeout);
 
-async function getImageId(assetId) {
-    try {
-        const response = await Axios.get(
-            `${ASSET_DELIVERY_ENDPOINT}?id=${assetId}`,
-            {
-                headers: { "Accept-Encoding": "gzip" },
+async function getImageId(assetId, retryCount) {
+    for (let attemptsMade = 0; attemptsMade < retryCount; attemptsMade++) {
+        try {
+            const response = await Axios.get(
+                `${ASSET_DELIVERY_ENDPOINT}?id=${assetId}`,
+                {
+                    headers: { "Accept-Encoding": "gzip" },
+                }
+            );
+
+            if (response.status !== 200) {
+                throw new Error(JSON.stringify({ error: true, message: response.data }));
             }
-        );
 
-        if (response.status !== 200) {
-            const error = { error: true, message: response.data };
-            console.log(response.status, error);
-            throw new Error(JSON.stringify(error));
+            const re = /<Content name="Texture">\s*<url>[^0-9]+(\d+)<\/url>\s*<\/Content>/;
+            const match = response.data.match(re);
+            if (!match) {
+                throw new Error(JSON.stringify({ error: true, message: "Couldn't find decal texture." }));
+            }
+
+            return match[1]; // exit loop once we have the match
+        } catch (e) {
+            // If it's the last attempt, throw the error
+            if (attemptsMade === retryCount - 1) {
+                console.log(500, { error: true, message: e.message });
+                throw e;
+            } else {
+                // If it's not the last attempt, wait for a while and try again.
+                await sleep(2000);
+                continue;
+            }
         }
-
-        const re = /<Content name="Texture">\s*<url>[^0-9]+(\d+)<\/url>\s*<\/Content>/;
-        const match = response.data.match(re);
-        if (!match) {
-            const error = {
-                error: true,
-                message: "Couldn't find decal texture.",
-            };
-            console.log(400, error);
-            throw new Error(JSON.stringify(error));
-        }
-
-        //console.log(200, { imageId: match[1] });
-        return match[1];
-    } catch (e) {
-        console.log(500, { error: true, message: e.message });
-        throw e;
     }
 }
 
-async function createAsset(filePath, fileName, displayName, creator, apiKey) {
+
+async function createAsset(filePath, fileName, displayName, creator, apiKey, retryCount) {
     const bodyFormData = new FormData();
     bodyFormData.append(
         "request",
@@ -75,57 +77,62 @@ async function createAsset(filePath, fileName, displayName, creator, apiKey) {
 
     bodyFormData.append("fileContent", fs.createReadStream(filePath), fileName);
 
-    try {
-        const response = await Axios.post(ASSETS_OUTER_ENDPOINT, bodyFormData, {
-            headers: {
-                ...bodyFormData.getHeaders(),
-                "x-api-key": apiKey,
-            },
-        });
-        return response.data.path;
-    } catch (err) {
-        const { data, status, statusText } = err.response;
-        console.error("Error data:", data);
-        console.error("HTTP status code:", status);
-        console.error("HTTP status text:", statusText);
+    for (let attemptsMade = 0; attemptsMade < retryCount; attemptsMade++) {
+        try {
+            const response = await Axios.post(ASSETS_OUTER_ENDPOINT, bodyFormData, {
+                headers: {
+                    ...bodyFormData.getHeaders(),
+                    "x-api-key": apiKey,
+                },
+            });
+            return response.data.path; // exit loop once we have the response
+        } catch (err) {
+            // If it's the last attempt, throw the error
+            if (attemptsMade === retryCount - 1) {
+                const { data, status, statusText } = err.response;
+                console.error("Error data:", data);
+                console.error("HTTP status code:", status);
+                console.error("HTTP status text:", statusText);
 
-        throw "Error creating asset";
-    }
-}
-
-async function getAssetId(operationId, apiKey) {
-    try {
-        let assetId = null;
-        let attempt = 0;
-        while (assetId == null && attempt < 5) { // try 5 times
-            attempt++;
-            try {
-                const response = await Axios.get(`${ASSETS_INNER_ENDPOINT}/${operationId}`, {
-                    headers: {
-                        'x-api-key': apiKey,
-                    },
-                });
-
-                assetId = response.data.response.assetId;
-            } catch (error) {
-                // If error is 404, then wait for a while and try again.
-                if (error.response.status === 404) {
-                    await sleep(2000); // wait for 2 seconds
-                    continue;
-                } else {
-                    throw error;
-                }
+                throw "Error creating asset";
+            } else {
+                // If it's not the last attempt, wait for a while and try again.
+                await sleep(2000);
+                continue;
             }
         }
-        if (assetId === null) {
-            throw new Error(`Failed to get assetId after ${attempt} attempts`);
-        }
-        return assetId;
-    } catch (error) {
-        console.error(`Error getting asset ID for operation ${operationId}:`, error);
-        throw error; // Re-throw the error to be caught higher up
     }
 }
+
+
+async function getAssetId(operationId, apiKey, retryCount) {
+    let assetId = null;
+    for (let attemptsMade = 0; attemptsMade < retryCount; attemptsMade++) {
+        try {
+            const response = await Axios.get(`${ASSETS_INNER_ENDPOINT}/${operationId}`, {
+                headers: { 'x-api-key': apiKey },
+            });
+
+            assetId = response.data.response.assetId;
+            break;  // exit loop once we got the assetId
+        } catch (error) {
+            // If error is 404, then wait for a while and try again.
+            if (error.response.status === 404) {
+                await sleep(2000); // wait for 2 seconds
+                continue;
+            }
+
+            throw error;
+        }
+    }
+
+    if (assetId === null) {
+        throw new Error(`Error: Failed to get assetId after ${retryCount} attempts`);
+    }
+
+    return assetId;
+}
+
 
 function getConfig() {
     const config = new Conf().get(configKey);
@@ -139,9 +146,15 @@ function getConfig() {
     if (!['user', 'group'].includes(config.creator)) {
         throw new Error('Invalid creator in the configuration');
     }
+    console.log(config);
+
+    config.getAssetIdRetryCount = config.getAssetIdRetryCount || 3; 
+    config.uploadAssetRetryCount = config.uploadAssetRetryCount || 3;
+    config.getImageIdRetryCount = config.getImageIdRetryCount || 3;    
 
     return config;
 }
+
 
 function getCreator(config) {
     switch (config.creator) {
@@ -204,13 +217,13 @@ export async function uploadImages(directoryPath, output, method) {
             try {
                 console.log(`[${colors.counter(counter)}] Uploading ${colors.file(file)}...`);
 
-                const operationId = await createAsset(filePath, file, uuidv4(), creator, apiKey);
-                const assetId = await getAssetId(operationId, apiKey);
+                const operationId = await createAsset(filePath, file, uuidv4(), creator, apiKey, config.uploadAssetRetryCount);
+                const assetId = await getAssetId(operationId, apiKey, config.getAssetRetryCount);
 
                 let imageId;
                 if (method === "both" || method === "image") {
-                    imageId = await getImageId(assetId);
-                }
+                    imageId = await getImageId(assetId, config.getImageIdRetryCount);
+                }                
 
                 const comma = counter !== fileCount ? ',\n' : '';
 

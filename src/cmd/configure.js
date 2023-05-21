@@ -1,5 +1,15 @@
 import Conf from 'conf';
+import colors from 'colors/safe';
+
 export const configKey = 'imgup-cli';
+
+colors.setTheme({
+    title: 'cyan',
+    key: 'yellow',
+    value: 'green',
+    saving: 'blue',
+    error: 'red'
+});
 
 export async function configure(args) {
   const config = new Conf();
@@ -7,11 +17,14 @@ export async function configure(args) {
   currentConfigObject = currentConfigObject || {};
 
   if (Object.keys(args).length === 1) {
-    console.log('Current configuration:');  
-    console.log('Creator: ' + currentConfigObject.creator); 
-    console.log('API Key: ' + currentConfigObject.apiKey);  
-    console.log('Group ID: ' + currentConfigObject.groupId);
-    console.log('User ID: ' + currentConfigObject.userId);
+    console.log(colors.title('Current configuration:'));  
+    console.log(colors.key('Creator:') + ' ' + colors.value(currentConfigObject.creator)); 
+    console.log(colors.key('API Key:') + ' ' + colors.value(currentConfigObject.apiKey));  
+    console.log(colors.key('Group ID:') + ' ' + colors.value(currentConfigObject.groupId));
+    console.log(colors.key('User ID:') + ' ' + colors.value(currentConfigObject.userId));
+    console.log(colors.key('Get Asset ID Retry Count:') + ' ' + colors.value(currentConfigObject.getAssetIdRetryCount));
+    console.log(colors.key('Upload Asset Retry Count:') + ' ' + colors.value(currentConfigObject.uploadAssetRetryCount));
+    console.log(colors.key('Get Image ID Retry Count:') + ' ' + colors.value(currentConfigObject.getImageIdRetryCount));
 
     return;
   }
@@ -22,7 +35,7 @@ export async function configure(args) {
   }
 
   if (!['user', 'group'].includes(creator)) {
-    throw new Error('Invalid creator in the configuration');
+    throw new Error(colors.error('Invalid creator in the configuration'));
   }
 
   let apiKey = args.apiKey || args.apikey || args['api-key'] || args.key || args.k;
@@ -40,9 +53,32 @@ export async function configure(args) {
     userId = currentConfigObject.userId;
   }
 
-  console.log('Saving configuration...');
+  let getAssetIdRetryCount = args.getAssetIdRetryCount || args['get-asset-id-retry-count'];
+  if (!getAssetIdRetryCount) {
+    getAssetIdRetryCount = currentConfigObject.getAssetIdRetryCount;
+  }
 
-  config.set(configKey, { creator: creator, apiKey: apiKey, groupId: groupId, userId: userId });
+  let uploadAssetRetryCount = args.uploadAssetRetryCount || args['upload-asset-retry-count'];
+  if (!uploadAssetRetryCount) {
+    uploadAssetRetryCount = currentConfigObject.uploadAssetRetryCount;
+  }
 
-  console.log('Configuration saved.');
+  let getImageIdRetryCount = args.getImageIdRetryCount || args['get-image-id-retry-count'];
+  if (!getImageIdRetryCount) {
+    getImageIdRetryCount = currentConfigObject.getImageIdRetryCount;
+  }
+
+  console.log(colors.saving('Saving configuration...'));
+
+  config.set(configKey, {
+    creator: creator,
+    apiKey: apiKey,
+    groupId: groupId,
+    userId: userId,
+    getAssetIdRetryCount: getAssetIdRetryCount,
+    uploadAssetRetryCount: uploadAssetRetryCount,
+    getImageIdRetryCount: getImageIdRetryCount,
+  });
+
+  console.log(colors.saving('Configuration saved.'));
 }
