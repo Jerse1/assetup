@@ -10,8 +10,11 @@
 3. [Prerequisites](#prerequisites)
 4. [Installation](#installation)
 5. [Usage](#usage)
-6. [Contributing](#contributing)
-7. [License](#license)
+6. [Configuration](#configuration)
+7. [Contributing](#contributing)
+8. [License](#license)
+9. [Support](#show-your-support)
+10. [Authors](#author)
 
 ## Overview
 
@@ -120,7 +123,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Give a ⭐️ if this project helped you!
 
-## Author
+## Authors
 
 👤 **Jerse1**
 
