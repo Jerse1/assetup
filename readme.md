@@ -55,6 +55,11 @@ git clone https://github.com/Jerse1/Asset-Uploader-CLI.git
     npm install
 ```
 
+4. Globally link
+```bash
+    npm link
+```
+
 ## Usage
 
 To upload images, run the following command:
