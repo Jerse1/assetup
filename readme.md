@@ -65,7 +65,7 @@ git clone https://github.com/Jerse1/Asset-Uploader-CLI.git
 To upload images, run the following command:
 
 ```bash
-    npm run assetup upload [options]
+    assetup upload [options] || node index.js upload [options]
 ```
 
 Options:
@@ -79,7 +79,8 @@ By default, the script will upload PNG image files from the ./input directory, g
 Example usage:
 
 ```bash
-    npm run assetup upload --i ./assets --o ./results.json --m image
+    assetup upload --i ./assets --o ./results.json --m image || 
+    node index.js upload --i ./assets --o ./results.json --m image
 ```
 
 ## Configuration
@@ -87,7 +88,7 @@ Example usage:
 The script uses a configuration file to store the necessary API key and other options. Before running the script, you need to set up the configuration by executing the following command:
 
 ```bash
-    npm run assetup config
+    assetup config || || node index.js config
 ```
 
 Configuration options:
@@ -103,7 +104,7 @@ Configuration options:
 Example usage:
 
 ```bash
-npm run assetup config --creator group --apiKey OPEN_CLOUD_KEY --groupId GROUP_ID
+assetup config --creator group --apiKey OPEN_CLOUD_KEY --groupId GROUP_ID
 ```
 
 This sets the configuration options to the provided values.
@@ -111,7 +112,7 @@ This sets the configuration options to the provided values.
 To view the current configuration, you can run the following command:
 
 ```bash
-    npm run assetup config
+    assetup config
 ```
 
 This will display the current configuration values.
