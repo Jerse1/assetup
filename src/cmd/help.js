@@ -2,15 +2,15 @@ import chalk from 'chalk';
 
 const menus = {
   main: `
-${chalk.greenBright('imgup [command] <options>')}
-  ${chalk.blueBright('upload')} ............. uploads images. Use '${chalk.italic('imgup upload')} --help' for more details.
-  ${chalk.blueBright('config')} ............. configure the CLI or display current configuration. Use '${chalk.italic('imgup config')} --help' for more details.
-  ${chalk.blueBright('version')} ............ shows the version of the CLI or of specific parts. Use '${chalk.italic('imgup version')} --help' for more details.
+${chalk.greenBright('assetup [command] <options>')}
+  ${chalk.blueBright('upload')} ............. uploads images. Use '${chalk.italic('assetup upload')} --help' for more details.
+  ${chalk.blueBright('config')} ............. configure the CLI or display current configuration. Use '${chalk.italic('assetup config')} --help' for more details.
+  ${chalk.blueBright('version')} ............ shows the version of the CLI or of specific parts. Use '${chalk.italic('assetup version')} --help' for more details.
   ${chalk.blueBright('help')} ............... shows help menu for a command.
 `,
 
   upload: `
-${chalk.greenBright('imgup upload <options>')}
+${chalk.greenBright('assetup upload <options>')}
 
 This command uploads images. Available options:
 
@@ -20,7 +20,7 @@ This command uploads images. Available options:
 `,
 
   config: `
-${chalk.greenBright('imgup config <options>')}
+${chalk.greenBright('assetup config <options>')}
 
 This command allows you to configure the CLI or display current configuration values if no options are provided. Available options:
 
@@ -34,7 +34,7 @@ This command allows you to configure the CLI or display current configuration va
 `,
 
   version: `
-${chalk.greenBright('imgup version <options>')}
+${chalk.greenBright('assetup version <options>')}
 This command shows the version of the CLI
 `,
 }
