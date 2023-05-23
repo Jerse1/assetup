@@ -1,18 +1,17 @@
 {
-  "name": "asset-uploader-cli",
+  "name": "assetup",
   "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin": {
-    "assetup": "./index.js"
-  },
+  "bin": "./index.js",
   "keywords": [],
   "author": "jerse",
   "license": "ISC",
   "dependencies": {
+    "assetup": "^1.0.2",
     "axios": "^0.27.2",
     "chalk": "4.0.0",
     "cli-table3": "^0.6.3",

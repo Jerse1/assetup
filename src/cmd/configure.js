@@ -26,10 +26,24 @@ export async function configure(args) {
   let apiKey = args.apiKey || args.apikey || args['api-key'] || args.key || args.k || currentConfigObject.apiKey;
   let groupId = args.groupId || args.groupid || args['group-id'] || args.group || currentConfigObject.groupId;
   let userId = args.userId || args.userid || args['user-id'] || args.user || currentConfigObject.userId;
-  let getAssetIdRetryCount = args.getAssetIdRetryCount || args['get-asset-id-retry-count'] || currentConfigObject.getAssetIdRetryCount || 3;
-  let uploadAssetRetryCount = args.uploadAssetRetryCount || args['upload-asset-retry-count'] || currentConfigObject.uploadAssetRetryCount || 3;
-  let getImageIdRetryCount = args.getImageIdRetryCount || args['get-image-id-retry-count'] || currentConfigObject.getImageIdRetryCount || 3;
+  let getAssetIdRetryCount = args.getAssetIdRetryCount 
+                          || args['get-asset-id-retry-count'] 
+                          || args.garc  // shorthand key
+                          || currentConfigObject.getAssetIdRetryCount 
+                          || 3;
 
+let uploadAssetRetryCount = args.uploadAssetRetryCount 
+                           || args['upload-asset-retry-count']
+                           || args.uarc  // shorthand key
+                           || currentConfigObject.uploadAssetRetryCount 
+                           || 3;
+
+let getImageIdRetryCount = args.getImageIdRetryCount 
+                          || args['get-image-id-retry-count']
+                          || args.giirc  // shorthand key
+                          || currentConfigObject.getImageIdRetryCount 
+                          || 3;
+                          
   const updatedConfig = {
     ...currentConfigObject,
     creator: creator,
