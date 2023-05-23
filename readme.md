@@ -17,12 +17,12 @@
 
 ## Overview
 
-AssetUp is a robust command-line interface program designed specifically for Roblox, written in JavaScript. The primary purpose of this tool is to enable bulk uploading of assets onto Roblox, using nothing but an open cloud key. Currently, AssetUp supports only image uploads, but future iterations will extend this functionality to accommodate a multitude of asset types.
+assetup is a robust command-line interface program designed specifically for Roblox, written in JavaScript. The primary purpose of this tool is to enable bulk uploading of assets onto Roblox, using nothing but an open cloud key. Currently, assetup supports only image uploads, but future iterations will extend this functionality to accommodate a multitude of asset types.
 
 ## Features
 
 - **Command-line interface:** Easy-to-use command-line interface that is compatible with most operating systems.
-- **Multi-format support:** Supports a wide range of asset formats.
+- **~~Multi-format support:~~** Supports a wide range of asset formats.
 - **Customizable:** You can configure the tool according to your preferences and requirements.
 
 ## Prerequisites
