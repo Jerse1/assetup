@@ -22,7 +22,7 @@ assetup is a robust command-line interface program designed specifically for Rob
 ## Features
 
 - **Command-line interface:** Easy-to-use command-line interface that is compatible with most operating systems.
-- **~~Multi-format support:~~** Supports a wide range of asset formats.
+- **~~Multi-format support:~~** ~~Supports a wide range of asset formats.~~
 - **Customizable:** You can configure the tool according to your preferences and requirements.
 
 ## Prerequisites
