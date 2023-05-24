@@ -33,10 +33,10 @@ colors.setTheme({
 
 const sleep = promisify(setTimeout);
 
-function generateDisplayName() {
-    const uniqueId = uuidv4();
-    return uniqueId;
-}
+//function generateDisplayName() {
+//    const uniqueId = uuidv4();
+//    return uniqueId;
+//}
 
 async function checkUserId(userId) {
     try {

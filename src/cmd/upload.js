@@ -1,7 +1,13 @@
 const METHODS = ['image', 'decal', 'both'];
 
+import colors from "colors/safe";
 import { uploadImages } from '../bin/ImageUploader.js';
 import fs from 'fs';
+
+colors.setTheme({
+  error: ["red", "bold"],
+});
+
 
 export async function upload(args) {
   if (args.o){
@@ -27,17 +33,16 @@ export async function upload(args) {
   }
 
   if (args.input) {
-    fs.access(args.input, fs.F_OK, (err) => {
-        if (err) {
-            console.error(`Input '${args.input}' must be valid!`)
-            return
-        }
-      })
+    if (!fs.existsSync(args.input)) {
+        console.error(colors.error(`Input '${args.input}' must be a valid directory!`));
+        
+        return
+    }
   }
 
   if (args.method) {
     if (!METHODS.includes(args.method)){
-        console.error(`Method '${args.method}' must be valid!`)
+        console.error(colors.error(`Method '${args.method}' must be a valid method!`))
 
         return
     }
