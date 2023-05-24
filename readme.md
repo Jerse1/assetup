@@ -40,7 +40,11 @@ To install `assetup`, simply run the following command:
 npm install assetup -g
 ```
 
-This command installs `assetup` globally on your machine, allowing you to run it from any location. Alternatively, you can use `npx` if you don't want to install it globally.
+This command installs `assetup` globally on your machine, allowing you to run it from any location. Alternatively, you can use `npx` to run it like if you don't want to install it globally.
+
+```bash
+  npx assetup [command] [options]
+```
 
 ## Usage
 
@@ -83,7 +87,7 @@ This command provides information about the available commands and their options
 Use the `version` command to display the version information.
 
 ```bash
-    assetup version [options]
+    assetup version
 ```
 
 This command shows the version of the CLI.

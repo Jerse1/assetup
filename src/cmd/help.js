@@ -5,7 +5,7 @@ const menus = {
 ${chalk.greenBright('assetup [command] <options>')}
   ${chalk.blueBright('upload')}      Uploads images. Use '${chalk.yellow('assetup help upload')}' for more details.
   ${chalk.blueBright('config')}      Configure the CLI or display current configuration. Use '${chalk.yellow('assetup help config')}' for more details.
-  ${chalk.blueBright('version')}     Shows the version of the CLI or of specific parts. Use '${chalk.yellow('assetup help version')}' for more details.
+  ${chalk.blueBright('version')}     Shows the version of the CLI. Use '${chalk.yellow('assetup help version')}' for more details.
   ${chalk.blueBright('help')}        Shows the help menu for a command.
 `,
 
