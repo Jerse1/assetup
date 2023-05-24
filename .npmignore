@@ -1,6 +1,4 @@
 # dependencies
 /node_modules
-
-# testing
 output.txt
 ./input/*
