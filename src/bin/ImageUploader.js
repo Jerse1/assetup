@@ -17,6 +17,7 @@ const OUTPUT_HEADER = "{\n";
 const OUTPUT_FOOTER = "\n}";
 
 colors.setTheme({
+    method: ["cyan", "bold"],
     fileOutput: ["cyan", "bold"],
     readingFiles: ["yellow", "bold"],
     noFilesFound: ["red", "bold"],
@@ -35,6 +36,88 @@ const sleep = promisify(setTimeout);
 function generateDisplayName() {
     const uniqueId = uuidv4();
     return uniqueId;
+}
+
+async function checkUserId(userId) {
+    try {
+        const response = await Axios.get(`https://users.roblox.com/v1/users/${userId}`);
+        if (response.status === 200) {
+            console.log(colors.success(`User ID ${userId} exists.`));
+
+            return true;
+        } else {
+            console.log(colors.error(`Failed to check existence of player ID ${userId}.`));
+
+            return false;
+        }
+    } catch (error) {
+        console.log(colors.error(`An error occurred while checking player ID ${userId}:`), error.message);
+
+        return false;
+    }
+}
+
+async function checkGroupId(groupId) {
+    try {
+        const response = await Axios.get(`https://groups.roblox.com/v1/groups/${groupId}`);
+        if (response.status === 200) {
+            console.log(colors.success(`Group ID ${groupId} exists.`));
+
+            return true;
+        } else {
+            console.log(colors.error(`Failed to check existence of group ID ${groupId}.`));
+
+            return false;
+        }
+    } catch (error) {
+        console.log(colors.error(`An error occurred while checking group ID ${groupId}:`), error.message);
+
+        return false;
+    }
+}
+
+function getConfig() {
+    const config = new Conf().get(configKey);
+
+    if (!config) {
+        throw new Error('Config object is undefined');
+    }
+    if (!config.apiKey) {
+        throw new Error('apiKey is missing in the configuration');
+    }
+    if (!['user', 'group'].includes(config.creator)) {
+        throw new Error('Invalid creator in the configuration');
+    }
+
+    config.getAssetIdRetryCount = config.getAssetIdRetryCount || 3;
+    config.uploadAssetRetryCount = config.uploadAssetRetryCount || 3;
+    config.getImageIdRetryCount = config.getImageIdRetryCount || 3;
+
+    return config;
+}
+
+async function getCreator(config) {
+    switch (config.creator) {
+        case 'group':
+            const group = await checkGroupId(config.groupId);
+            if (!group) {
+                throw new Error('Group does not exist');
+            }
+
+            return {
+                groupId: String(config.groupId),
+            };
+        case 'user':
+            const user = await checkUserId(config.userId);
+            if (!user) {
+                throw new Error('User does not exist');
+            }
+            return {
+                userId: String(config.userId),
+            };
+        default:
+            throw new Error('Invalid creator in the configuration');
+    }
 }
 
 async function getImageId(assetId, retryCount) {
@@ -71,76 +154,6 @@ async function getImageId(assetId, retryCount) {
         }
     }
 }
-async function createAsset(filePath, fileName, creator, apiKey, retryCount) {
-    for (let attemptsMade = 0; attemptsMade < retryCount; attemptsMade++) {
-        const displayName = generateDisplayName();
-
-        let bodyFormData = new FormData();
-        bodyFormData.append(
-            "request",
-            JSON.stringify({
-                assetType: ASSET_TYPE,
-                creationContext: {
-                    creator,
-                },
-                description: "Generated via OpenCloud API",
-                displayName,
-            })
-        );
-
-        bodyFormData.append("fileContent", fs.createReadStream(filePath), fileName);
-
-        try {
-            const response = await Axios.post(ASSETS_OUTER_ENDPOINT, bodyFormData, {
-                headers: {
-                    ...bodyFormData.getHeaders(),
-                    "x-api-key": apiKey,
-                },
-            });
-
-            return response.data.path; // exit loop once we have the response
-        } catch (err) {
-            // If it's the last attempt, throw the error
-            if (attemptsMade === retryCount - 1) {
-                const response = err.response || {};
-                const { status, statusText, data } = response;
-                console.error(colors.error("Error: Failed to create asset"));
-                console.error(colors.error("HTTP status code:"), status);
-                console.error(colors.error("HTTP status text:"), statusText);
-
-                // Log error data if available
-                if (data && data.message && data.code) {
-                    console.error(colors.error("Error code:"), data.code);
-                    console.error(colors.error("Error message:"), data.message);
-                }
-
-                throw new Error("Error creating asset");
-            } else {
-                // If it's not the last attempt, wait for a while and try again.
-                const retriesLeft = retryCount - attemptsMade - 1;
-                console.log(colors.yellow(`[${attemptsMade + 1}/${retryCount}] Retry uploading ${colors.file(fileName)}. Retries left: ${retriesLeft}`));
-
-                const response = err.response || {};
-                const { data } = response;
-                if (data && data.message && data.code) {
-                    console.error(colors.yellow(`[${attemptsMade + 1}/${retryCount}] Error code:`), data.code);
-                    console.error(colors.yellow(`[${attemptsMade + 1}/${retryCount}] Error message:`), data.message);
-                }
-                // Handle network errors separately
-                if (err.code === "ECONNRESET") {
-                    console.error(colors.error(`[${attemptsMade + 1}/${retryCount}] Network error occurred. Retrying...`));
-                    await sleep(2000);
-                    continue;
-                }
-
-                // For other errors, wait for a while and retry
-                await sleep(2000);
-                continue;
-            }
-        }
-    }
-}
-
 
 async function getAssetId(operationId, apiKey, retryCount) {
     let assetId = null;
@@ -172,45 +185,101 @@ async function getAssetId(operationId, apiKey, retryCount) {
     return assetId;
 }
 
-function getConfig() {
-    const config = new Conf().get(configKey);
+async function createAsset(filePath, fileName, creator, apiKey, retryCount) {
+    for (let attemptsMade = 0; attemptsMade < retryCount; attemptsMade++) {
+        const displayName = "Display Name"
 
-    if (!config) {
-        throw new Error('Config object is undefined');
-    }
-    if (!config.apiKey) {
-        throw new Error('apiKey is missing in the configuration');
-    }
-    if (!['user', 'group'].includes(config.creator)) {
-        throw new Error('Invalid creator in the configuration');
-    }
+        let bodyFormData = new FormData();
+        bodyFormData.append(
+            "request",
+            JSON.stringify({
+                assetType: ASSET_TYPE,
+                creationContext: {
+                    creator,
+                },
+                description: "Generated via OpenCloud API",
+                displayName,
+            })
+        );
 
-    config.getAssetIdRetryCount = config.getAssetIdRetryCount || 3;
-    config.uploadAssetRetryCount = config.uploadAssetRetryCount || 3;
-    config.getImageIdRetryCount = config.getImageIdRetryCount || 3;
+        bodyFormData.append("fileContent", fs.createReadStream(filePath), displayName);
 
-    return config;
-}
+        try {
+            const response = await Axios.post(ASSETS_OUTER_ENDPOINT, bodyFormData, {
+                headers: {
+                    ...bodyFormData.getHeaders(),
+                    "x-api-key": apiKey,
+                },
+            });
 
-function getCreator(config) {
-    switch (config.creator) {
-        case 'group':
-            return {
-                groupId: String(config.groupId),
-            };
-        case 'user':
-            return {
-                userId: String(config.userId),
-            };
-        default:
-            throw new Error('Invalid creator in the configuration');
+            return response.data.path; // exit loop once we have the response
+        } catch (err) {
+            const retriesLeft = retryCount - attemptsMade - 1;
+
+            console.log(colors.yellow(`[${attemptsMade + 1}/${retryCount}] Retry uploading ${colors.file(fileName)} [${colors.file(displayName)}]. Retries left: ${retriesLeft}`));
+
+            const response = err.response || {};
+            const { status, statusText, data } = response;
+
+            console.error(colors.yellow(`[${attemptsMade + 1}/${retryCount}] HTTP status code:`), status);
+            console.error(colors.yellow(`[${attemptsMade + 1}/${retryCount}] HTTP status text:`), statusText);
+
+            if (data.code) {
+                console.error(colors.yellow(`[${attemptsMade + 1}/${retryCount}] Error code:`), data.code);
+            }
+            if (data.message) {
+                console.error(colors.yellow(`[${attemptsMade + 1}/${retryCount}] Error message:`), data.message);
+            }
+
+            if (!data.message && !data.code && data) {
+                console.log(colors.yellow(`[${attemptsMade + 1}/${retryCount}] Error data:`), data);
+            }
+
+            // If it's the last attempt, throw the error
+            if (retriesLeft == 0) {
+                throw "Error creating asset"
+            } else {
+                // Handle network errors separately
+                if (err.code === "ECONNRESET") {
+                    console.error(colors.error(`[${attemptsMade + 1}/${retryCount}] Network error occurred. Retrying...`));
+                    await sleep(2000);
+                    continue;
+                }
+
+                // For other errors, wait for a while and retry
+                await sleep(2000);
+                continue;
+            }
+        }
     }
 }
 
 export async function uploadImages(directoryPath, output, method) {
-    const outputStream = fs.createWriteStream(output);
+    console.log(colors.readingFiles("Retrieving configuration..."));
+
     const config = getConfig();
 
+    console.log(colors.success("Successfully retrieved configuration."));
+
+    const apiKey = config.apiKey;
+    if (!apiKey) {
+        console.log(colors.error("API key is missing in the configuration."));
+        return;
+    }
+
+    var creator;
+    try {
+        creator = await getCreator(config);
+    }
+    catch (error) {
+        console.error(colors.error(`Failed to get creator: `), error);
+
+        return;
+    }
+
+    const outputStream = fs.createWriteStream(output);
+
+    console.log(colors.method(`Method: ${method}`));
     console.log(colors.fileOutput(`File output: ${output}`));
     console.log(colors.readingFiles(`Reading files from ${directoryPath}`));
 
@@ -232,13 +301,11 @@ export async function uploadImages(directoryPath, output, method) {
         return;
     }
 
-    console.log(colors.fileCount(`Found ${colors.number(files.length)} files in the directory.`));
-
     const fileCount = files.length;
-    const apiKey = config.apiKey;
-    const creator = getCreator(config);
+    const filesVerb = fileCount === 1 ? "file" : "files";
+    console.log(colors.fileCount(`Found ${colors.number(fileCount)} ${filesVerb} in the directory.`));
 
-    console.log(colors.upload(`Uploading ${colors.number(fileCount)} files...`));
+    console.log(colors.upload(`Uploading ${colors.number(fileCount)} ${filesVerb}...`));
 
     const totalStartTime = Date.now();
     let previousTime = process.hrtime.bigint();
@@ -261,9 +328,7 @@ export async function uploadImages(directoryPath, output, method) {
             try {
                 console.log(`[${colors.counter(counter)}] ${colors.upload(`Uploading ${colors.file(file)}...`)}`);
 
-                const DisplayName = generateDisplayName();
-
-                const operationId = await createAsset(filePath, DisplayName, creator, apiKey, config.uploadAssetRetryCount);
+                const operationId = await createAsset(filePath, file, creator, apiKey, config.uploadAssetRetryCount);
                 const assetId = await getAssetId(operationId, apiKey, config.getAssetIdRetryCount);
 
                 let imageId;
@@ -300,6 +365,7 @@ export async function uploadImages(directoryPath, output, method) {
             } catch (error) {
                 outputStream.write(`[${counter}] = nil`);
 
+                console.log()
                 console.error(colors.error(`Failed to upload file ${file}:`), error);
 
                 failureCount++;

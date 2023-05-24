@@ -3,10 +3,10 @@ import chalk from 'chalk';
 const menus = {
   main: `
 ${chalk.greenBright('assetup [command] <options>')}
-  ${chalk.blueBright('upload')} ............. uploads images. Use '${chalk.italic('assetup upload')} --help' for more details.
-  ${chalk.blueBright('config')} ............. configure the CLI or display current configuration. Use '${chalk.italic('assetup config')} --help' for more details.
-  ${chalk.blueBright('version')} ............ shows the version of the CLI or of specific parts. Use '${chalk.italic('assetup version')} --help' for more details.
-  ${chalk.blueBright('help')} ............... shows help menu for a command.
+  ${chalk.blueBright('upload')}      Uploads images. Use '${chalk.yellow('assetup help upload')}' for more details.
+  ${chalk.blueBright('config')}      Configure the CLI or display current configuration. Use '${chalk.yellow('assetup help config')}' for more details.
+  ${chalk.blueBright('version')}     Shows the version of the CLI or of specific parts. Use '${chalk.yellow('assetup help version')}' for more details.
+  ${chalk.blueBright('help')}        Shows the help menu for a command.
 `,
 
   upload: `
@@ -14,9 +14,12 @@ ${chalk.greenBright('assetup upload <options>')}
 
 This command uploads images. Available options:
 
-  --input, -i ........... specifies the directory path containing the images to be uploaded
-  --output, -o .......... specifies the output file path for storing asset information
-  --method, -m .......... selects the upload method. Can be 'both', 'image', or 'decal'
+  ${chalk.yellow('--input, -i')}    Specifies the directory path containing the images to be uploaded. Default: ${chalk.yellow('input')}
+  ${chalk.yellow('--output, -o')}   Specifies the output file path for storing asset information. Default: ${chalk.yellow('output.txt')}
+  ${chalk.yellow('--method, -m')}   Selects the upload method. Can be '${chalk.yellow('image')}', '${chalk.yellow('decal')}', or '${chalk.yellow('both')}'. Default: ${chalk.yellow('image')}
+
+Example:
+  ${chalk.yellow('assetup upload --input images --output output.txt --method image')}
 `,
 
   config: `
@@ -24,18 +27,35 @@ ${chalk.greenBright('assetup config <options>')}
 
 This command allows you to configure the CLI or display current configuration values if no options are provided. Available options:
 
-  --creator, -c, --Creator ........... sets the creator type as either 'user' or 'group'
-  --apiKey, -k, --apikey, --api-key, --key ............ sets the API key for authentication
-  --groupId, --groupid, --group-id, --group ........... sets the group ID
-  --userId, --userid, --user-id, --user ............ sets the user ID
-  --getAssetIdRetryCount, --get-asset-id-retry-count, --garc .. sets the number of retries for getting the asset ID (default: 3)
-  --uploadAssetRetryCount, --upload-asset-retry-count, --uarc . sets the number of retries for uploading an asset (default: 3)
-  --getImageIdRetryCount, --get-image-id-retry-count, --giirc .. sets the number of retries for getting the image ID (default: 3)
+  ${chalk.yellow('--creator, -c, --Creator')}
+    Sets the creator type as either '${chalk.yellow('user')}' or '${chalk.yellow('group')}'. Default: ${chalk.yellow('user')}
+
+  ${chalk.yellow('--apiKey, -k, --apikey, --api-key, --key')}
+    Sets the API key for authentication. 
+    You can generate an API key by following the instructions in the Roblox API documentation: ${chalk.yellow('https://create.roblox.com/docs/reference/cloud/managing-api-keys')}
+
+  ${chalk.yellow('--groupId, --groupid, --group-id, --group')}
+    Sets the group ID
+
+  ${chalk.yellow('--userId, --userid, --user-id, --user')}
+    Sets the user ID
+
+  ${chalk.yellow('--getAssetIdRetryCount, --get-asset-id-retry-count, --garc')}
+    Sets the number of retries for getting the asset ID. Default: ${chalk.yellow('3')}
+
+  ${chalk.yellow('--uploadAssetRetryCount, --upload-asset-retry-count, --uarc')}
+    Sets the number of retries for uploading an asset. Default: ${chalk.yellow('3')}
+
+  ${chalk.yellow('--getImageIdRetryCount, --get-image-id-retry-count, --giirc')}
+    Sets the number of retries for getting the image ID. Default: ${chalk.yellow('3')}
+
+Example:
+  ${chalk.yellow('assetup config --apiKey KEY_HERE')}
 `,
 
   version: `
-${chalk.greenBright('assetup version <options>')}
-This command shows the version of the CLI
+${chalk.greenBright('assetup version')}
+This command shows the version of the CLI.
 `,
 }
 

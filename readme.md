@@ -51,20 +51,21 @@ Use the `upload` command to upload images.
 ```bash
     assetup upload [options]
 ```
+
 This command uploads images to Roblox from a specified directory and provides you with asset IDs. Available options allow you to customize the input and output directories, and the upload method.
 
 Options:
 
-- `--i, --input <path>`: Specifies the directory path containing the PNG image files to be uploaded (default: ./input)
-- `--o, --output <file>`: Specifies the output file path for storing asset information (default: ./output.txt)
-- `--m, --method <value>`: Selects the upload method: 'both', 'image', or 'decal' (default: 'both')
+- `--i, --input <path>`: Specifies the directory path containing the PNG image files to be uploaded (default: input)
+- `--o, --output <file>`: Specifies the output file path for storing asset information (default: output.txt)
+- `--m, --method <value>`: Selects the upload method: 'both', 'image', or 'decal' (default: 'image')
 
-By default, the script will upload PNG image files from the ./input directory, generate an output file ./output.txt, and use the 'both' method to retrieve both asset IDs and image IDs. You can customize these settings according to your needs.
+By default, the script will upload PNG image files from the input directory, generate an output file output.txt, and use the 'both' method to retrieve both asset IDs and image IDs. You can customize these settings according to your needs.
 
 Example usage:
 
 ```bash
-    assetup upload --i ./assets --o ./results.json --m image
+    assetup upload --i assets --o output.txt --m image
 ```
 
 **Help**:
@@ -100,8 +101,20 @@ Configuration options:
 - **Creator**: Set the creator type. Default is `'user'`.
   - Accepts: `'user'`, `'group'`
   - Keys: `--creator`, `-c`, `--Creator`
-- **API Key**: Set the API key for authentication.
-  - Keys: `--apiKey`, `-k`, `--apikey`, `--api-key`, `--key`
+- **API Key**: Set the API key for authentication. You can generate an API key by following these steps:
+
+ 1. Go to the [Roblox Developer Dashboard](https://create.roblox.com/dashboard/credentials).
+ 2. Click on "New API Key" to create a new API key.
+ 3. Enter a unique name for your API key in the "Name" field.
+ 4. Optionally, enter a description for your API key in the "Description" field.
+ 5. Add the "Assets API" System in the "Access Permissions" section to the API key.
+ 6. Configure the access permissions for your API key. Make sure to grant the *Read* and *Write* permissions for the asset API to perform the desired actions. You can refer to the [Managing API Keys tutorial](https://create.roblox.com/docs/reference/cloud/managing-api-keys) for detailed instructions on managing API keys.
+ 7. Specify the accepted IP addresses under the "Accepted IP Addresses" section. You can enter `0.0.0.0/0` to accept requests from any IP address.
+ 8. Set the expiration date for the API key if desired.
+ 9. Click "Create" to generate the API key.
+ 10. Copy the generated API key and use it as the value for the `--apiKey` option in the `assetup config` CLI commands.
+
+- Keys: `--apiKey`, `-k`, `--apikey`, `--api-key`, `--key`
 - **Group ID**: Set the group ID if the creator type is 'group'. Default is `empty`.
   - Keys: `--groupId`, `--groupid`, `--group-id`, `--group`
 - **User ID**: Set the user ID if the creator type is 'user'. Default is `empty`.
