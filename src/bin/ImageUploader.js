@@ -144,7 +144,7 @@ async function getImageId(assetId, retryCount) {
         } catch (e) {
             // If it's the last attempt, throw the error
             if (attemptsMade === retryCount - 1) {
-                console.error(colors.error.bold(`Failed to retrieve image ID for asset ${assetId}:`), e);
+                console.error(colors.error(`Failed to retrieve image ID for asset ${assetId}:`), e);
                 throw e;
             } else {
                 // If it's not the last attempt, wait for a while and try again.
@@ -164,8 +164,16 @@ async function getAssetId(operationId, apiKey, retryCount) {
                     'x-api-key': apiKey,
                 },
             });
+            //console.log("hey", response.data);
+
+            if (!response.data.done){
+                await sleep(500);
+
+                continue;
+            }
 
             assetId = response.data.response.assetId;
+
             break; // exit loop once we got the assetId
         } catch (error) {
             // If error is 404, then wait for a while and try again.
@@ -284,17 +292,18 @@ export async function uploadImages(directoryPath, output, method) {
     console.log(colors.readingFiles(`Reading files from ${directoryPath}`));
 
     const files = fs.readdirSync(directoryPath)
-        .filter(file => path.extname(file) === ".png") // Only process .png files
-        .sort((a, b) => {
-            const numA = Number(a.split('.png')[0]); // Assuming files are named like '123.png'
-            const numB = Number(b.split('.png')[0]);
+    .filter(file => path.extname(file) === ".png") // Only process .png files
+    .sort((a, b) => {
+        const numA = Number(a.match(/\d+/)[0]); // Extract the first numeric sequence from the filename
+        const numB = Number(b.match(/\d+/)[0]);
 
-            if (isNaN(numA) || isNaN(numB)) {
-                return a.localeCompare(b); // if names are not numbers, sort them as strings
-            }
+        if (!numA || !numB) {
+            return a.localeCompare(b); // if names don't have numbers, sort them as strings
+        }
 
-            return numA - numB; // This will sort numerically
-        });
+        return numA - numB; // This will sort numerically based on the extracted number
+    });
+
 
     if (!files || files.length === 0) {
         console.log(colors.noFilesFound("No files found in the directory."));
